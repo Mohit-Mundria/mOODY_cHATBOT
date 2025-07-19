@@ -1,27 +1,33 @@
+import streamlit as st
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import joblib
 import numpy as np
-import random 
+import random
 import requests
 import json
 
-emotion_dict={
-    0:'sad',
-    1:'joy',
-    2:'love',
+
+# Load model and tokenizer with caching to optimize performance
+@st.cache_resource
+def load_model_and_tokenizer():
+    model = load_model(r'D:\End to end project\Moody_Chatbot\mOODY_cHATBOT\emotion_classifier.h5')
+    vectorizer = joblib.load(r'D:\End to end project\Moody_Chatbot\mOODY_cHATBOT\emotion_tokenizer.pkl')
+    return model, vectorizer
+
+model, vectorizer = load_model_and_tokenizer()
+
+# Emotion dictionary mapping indices to emotion names
+emotion_dict = {
+    0: 'sad',
+    1: 'joy',
+    2: 'love',
     3: 'anger',
-    4:'fear',
-    5:'surprise'
+    4: 'fear',
+    5: 'surprise'
 }
 
-
-model=load_model(r'D:\End to end project\Moody_Chatbot\mOODY_cHATBOT\emotion_classifier.h5')
-vectorizer=joblib.load(r'D:\End to end project\Moody_Chatbot\mOODY_cHATBOT\emotion_tokenizer.pkl')
-
-    
-    
-
+# Emotion prompts for generating responses based on predicted emotions
 emotion_prompts = {
     "sad": [
         "User feels sad. Write a response that validates their feelings and offers comfort.",
@@ -45,7 +51,6 @@ emotion_prompts = {
         "Start with: 'Hey, I noticed you're feeling a bit low. Want to talk about it?'",
         "Let the user know that this feeling will pass, but you're here now."
     ],
-    
     "joy": [
         "The user is feeling happy. Celebrate their joy and ask what’s making them smile.",
         "Respond excitedly and share their happiness. Be cheerful!",
@@ -68,7 +73,6 @@ emotion_prompts = {
         "Celebrate their mood and suggest keeping the streak going.",
         "Encourage them to keep doing whatever made them feel so joyful."
     ],
-    
     "love": [
         "User feels love. Respond with warmth and ask what sparked that feeling.",
         "Acknowledge their loving vibe and share a positive message back.",
@@ -91,7 +95,6 @@ emotion_prompts = {
         "Support their feeling with curiosity, not judgment.",
         "Offer a moment of reflection or a prompt like: 'What does love mean to you right now?'"
     ],
-    
     "anger": [
         "The user is feeling angry. Help them calm down, validate them, don’t escalate.",
         "Respond like a neutral friend. Let them vent safely.",
@@ -114,7 +117,6 @@ emotion_prompts = {
         "Don’t dismiss their feelings. Reflect what they say in a calm tone.",
         "Let them know you’re not judging and you're here to listen."
     ],
-    
     "fear": [
         "User feels scared or anxious. Be calm and comforting. Ask what’s making them afraid.",
         "Say: 'It’s okay to be scared. Want to talk about it?'",
@@ -137,7 +139,6 @@ emotion_prompts = {
         "Ask if they want to talk about a plan or just vent.",
         "Support them emotionally without questioning their fears."
     ],
-    
     "surprise": [
         "User feels surprised. Respond with curiosity and ask what happened.",
         "Be playful or astonished — mirror their emotion.",
@@ -162,46 +163,66 @@ emotion_prompts = {
     ]
 }
 
-    
-# Here we define the predict function that takes input text and return the predicted emotion class 
+# Function to predict emotion from user input
 def predict(text):
-    text_vectorized=vectorizer.texts_to_sequences([text])
+    text_vectorized = vectorizer.texts_to_sequences([text])
     padded = pad_sequences(text_vectorized, maxlen=200)
     padded = np.array(padded)
-    prediction=model.predict(padded)
-    predicted_class=prediction.argmax(axis=1)[0]
+    prediction = model.predict(padded)
+    predicted_class = prediction.argmax(axis=1)[0]
     return predicted_class
 
-
-# Here we desine a function to get the response from the LLM(llama3.2:latest) based on the predicted emotion.
-def get_response(input_text,emotion_pred):
-    
+# Function to get response from Ollama based on predicted emotion
+def get_response(input_text, emotion_pred):
     prompt = random.choice(emotion_prompts[emotion_pred])
     response = requests.post(
-         'http://localhost:11434/api/generate',
-         json={
+        'http://localhost:11434/api/generate',
+        json={
             'model': 'llama3.2:latest',
-            'prompt': f"{prompt}\nUser said: '{input_text}'\nGenerate an empathetic, contextual response.",
+            'prompt': f"{prompt}\nUser said: '{input_text}'\nGenerate an response.",
             'stream': False
         }
     )
     return response.json()['response']
 
+# Main Streamlit app
+st.title("Moody Chatbot")
 
-# This is the main function that runs the chatbot, takes user input, predict the emotion, and then generate the response from llm based on the predicted emotion.
-def chatbot():
-    while True:
-        input_text=input("You: ")
-        if input_text.lower() in ['exit', 'quit', 'bye', 'goodbye', 'stop', 'end', 'close']:
-            print("Chatbot: Goodbye Dear User! Take Care, See you soon!")
-            break
-        emotion=predict(input_text)
-        emotion_pred=emotion_dict[emotion]
-        print(f"From Given Input Your Emotion is: {emotion_pred}")
-        print("Chatbot is thinking...")
-        response=get_response(input_text, emotion_pred)
-        print(f"Chatbot: {response}")
+# Initialize conversation history in session state
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = []
 
+# Get user input
+user_input = st.chat_input("Type your message here...")
 
-chatbot()
+# Process input and update conversation history
+if user_input:
+    # Append user message to conversation history
+    st.session_state.conversation.append({"role": "user", "content": user_input})
+    
+    # Check if the user wants to exit
+    if user_input.lower() in ['exit', 'quit', 'bye', 'goodbye', 'stop', 'end', 'close']:
+        response = "Goodbye Dear User! Take Care, See you soon!"
+        st.session_state.conversation.append({"role": "assistant", "content": response})
+    else:
+        # Predict emotion
+        emotion = predict(user_input)
+        emotion_pred = emotion_dict[emotion]
+        emotion_message = f"From Given Input Your Emotion is: {emotion_pred}"
+        st.session_state.conversation.append({"role": "assistant", "content": emotion_message})
         
+        # Get response from Ollama with a spinner to indicate thinking
+        with st.spinner("Chatbot is thinking..."):
+            response = get_response(user_input, emotion_pred)
+        
+        # Add chatbot response to conversation history
+        st.session_state.conversation.append({"role": "assistant", "content": response})
+
+# Display the conversation history after processing the input
+for message in st.session_state.conversation:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+        
+
+st.write("Welcome to the Moody Chatbot! Type your message to start chatting.")
+st.write("Type 'exit' or 'quit', 'bye', or 'goodbye' to end the conversation.")

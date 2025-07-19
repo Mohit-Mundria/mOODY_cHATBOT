@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.h5
+*.pkl
+prediction.py
+*.csv
+*.ipynb
+*.md
