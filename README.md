@@ -1,19 +1,21 @@
-🌈 Moody Chatbot: Your Emotion-Sensing Companion 🤖
+***🌈 Moody Chatbot: Your Emotion-Sensing Companion 🤖***
 Welcome to Moody Chatbot, a heartwarming, AI-powered conversational buddy that not only listens to what you say but also feels your emotions! Built with love and a sprinkle of tech magic, this chatbot uses deep learning to detect your emotions and responds with thoughtful replies powered by LLaMA 3.2. Whether you’re feeling joyful, sad, or surprised, Moody Chatbot is here to chat, comfort, or celebrate with you. 🎉
-This project is a unique blend of TensorFlow for emotion prediction, Streamlit for a slick web interface, and Ollama for generating empathetic responses, all wrapped in a Docker container for easy deployment. Ready to dive into the world of emotional AI? Let’s get started!
+This project is a unique blend of TensorFlow for emotion prediction, Streamlit for a slick web interface, and Ollama for generating empathetic responses, all wrapped in a Docker container for easy deployment. Ready to dive into the world of emotional AI? Let’s get started.
 
-🚀 What is Moody Chatbot?
-Moody Chatbot is a web-based chatbot that:
 
-Reads Your Emotions: Analyzes your text input to predict emotions like joy, sadness, love, anger, fear, or surprise using a TensorFlow model.
-Responds Thoughtfully: Crafts personalized, context-aware responses using LLaMA 3.2 via the Ollama server, tailored to your emotional state.
-Runs Anywhere: Packaged in a Docker container for seamless deployment on any system, from your laptop to the cloud.
+***🧬 The Secret Sauce: Emotion-Driven Intelligence***
 
-Think of it as a virtual friend who’s always ready to listen, understand, and respond with just the right vibe. Whether you’re sharing a happy moment or venting about a tough day, Moody Chatbot has your back! 😊
+Moody Chatbot isn’t just another project riding on the back of a large language model like LLaMA 3.2. It’s a carefully crafted system with a unique twist: a custom-built emotion classifier that sets it apart. Here’s what makes Moody special:
+Emotion Classifier First: I built a TensorFlow-based model (emotion_classifier.h5) from scratch to analyze your text and predict one of six emotions: sad, joy, love, anger, fear, or surprise. This isn’t a pre-packaged solution—it’s my own work, trained to understand the nuances of human emotion.
+Emotion-Guided Responses: Only after detecting your emotion does LLaMA 3.2 step in, using a curated set of emotion-specific prompts to generate a response that matches your mood. For example, if you’re sad, Moody offers comfort; if you’re joyful, it celebrates with you.
+A True Chatbot Experience: This isn’t a basic function that takes input and spits out output. I created a fully interactive chatbot with a conversational flow, session memory to track your chat history, and a user-friendly Streamlit interface. It’s like chatting with a friend who remembers the conversation!
 
-🎨 Features That Make Moody Special
+This combination of my custom emotion classifier and LLaMA’s response generation makes Moody a unique, empathetic conversational AI that truly understands you.
 
-Emotion Detection: Uses a pre-trained TensorFlow model (emotion_classifier.h5) to classify your text into one of six emotions: sad, joy, love, anger, fear, surprise.
+
+**🎨 Features That Make Moody Special**
+
+Emotion Detection: Uses a Deep Learning LSTM  model (emotion_classifier.h5) to classify your text into one of six emotions: sad, joy, love, anger, fear, surprise.
 Dynamic Responses: Leverages LLaMA 3.2 (via Ollama) to generate empathetic, emotion-specific replies from a curated set of prompts.
 Interactive UI: Built with Streamlit for a clean, chat-like interface accessible at http://localhost:8501.
 Session Persistence: Remembers your conversation history using Streamlit’s session_state for a seamless chat experience.
@@ -21,16 +23,18 @@ Dockerized Deployment: Runs in a lightweight Docker container with all dependenc
 Exit Gracefully: Type “exit,” “quit,” or “bye” to end the chat with a warm farewell message.
 
 
-🛠️ Project Structure
+**🛠️ Project Structure**
 Here’s how the project is organized in the mOODY_cHATBOT directory:
 mOODY_cHATBOT/
-├── app.py                  # The heart of the chatbot: Streamlit app logic
-├── requirements.txt        # Python dependencies for the app
-├── Dockerfile              # Docker configuration for building the container
-├── .dockerignore           # Excludes unnecessary files from the Docker image
-├── emotion_classifier.h5   # Pre-trained TensorFlow model for emotion prediction
-├── emotion_tokenizer.pkl   # Tokenizer for text preprocessing
-
+├── app.py                  # The heart of the chatbot: Streamlit app logic.
+├── requirements.txt        # Python dependencies for the app.
+├── Dockerfile              # Docker configuration for building the container.
+├── .dockerignore           # Excludes unnecessary files from the Docker image.
+├── emotion_classifier.h5   # Deep Learning LSTM model for emotion prediction.
+├── emotion_tokenizer.pkl   # Tokenizer for text preprocessing.
+├──emotion.csv              # Dataset on which our model get trained.
+├──emotion_classifier.ipynb # Jupyter Notebook for emotion classification.
+├──prediction.py            # This is the raw code without streamlit integration. I did it because of better understanding of  the                           logic. As the streamlit code is written by ChatGPT.
 
 💻 Getting Started
 Ready to chat with Moody? Follow these steps to set up and run the project locally or in a Docker container.
@@ -42,7 +46,7 @@ Ollama: To serve LLaMA 3.2 responses (included in the Docker setup).
 System Resources: At least 16GB RAM recommended for LLaMA 3.2 and TensorFlow.
 Internet: Needed to download the LLaMA 3.2 model and dependencies.
 
-Option 1: Run Locally (Without Docker)
+**Option 1: Run Locally (Without Docker)**
 
 Clone the Repository (if hosted on GitHub, or copy the project folder):
 git clone https://github.com/your-username/moody-chatbot.git
@@ -79,7 +83,7 @@ Type a message (e.g., “I’m so happy!”) and see Moody respond with the pred
 
 
 
-Option 2: Run with Docker
+**Option 2: Run with Docker**
 
 Ensure Docker Desktop Is Running:
 
@@ -119,11 +123,11 @@ Port: Exposes 8501 for Streamlit.
 Command: Runs ollama serve and streamlit run app.py.
 
 
-🧠 How Moody Works
+**🧠 How Moody Works**
 
 Emotion Prediction:
 
-Your input text is processed using emotion_tokenizer.pkl to convert it into a format the TensorFlow model (emotion_classifier.h5) understands.
+Your input text is processed using emotion_tokenizer.pkl to convert it into a format the LSTM model (emotion_classifier.h5) understands.
 The model predicts one of six emotions: sad, joy, love, anger, fear, surprise.
 
 
@@ -166,7 +170,7 @@ Switch to Hyper-V if WSL fails (Docker Desktop Settings > General).
 
 
 
-🌟 Contributing
+**🌟 Contributing**
 Want to make Moody even cooler? Contributions are welcome! Here’s how:
 
 Fork the Repo: If hosted on GitHub, fork it and make changes.
@@ -174,15 +178,15 @@ Add Features: Improve emotion detection, add new prompts, or enhance the UI.
 Submit Pull Requests: Share your improvements with the community.
 
 
-📜 License
-[Insert License Here, e.g., MIT License]
-
-Note: If you’d like a specific license, let me know, and I can update this section!
+**📜 License**
+Apache License
 
 
-🙌 Acknowledgments
 
-TensorFlow: For powering emotion detection.
+
+**🙌 Acknowledgments**
+
+Deep Learning (LSTM): For powering emotion detection.
 Streamlit: For the slick, easy-to-use web interface.
 Ollama: For making LLaMA 3.2 accessible.
 You: For building this awesome project and bringing Moody to life!
@@ -191,9 +195,7 @@ You: For building this awesome project and bringing Moody to life!
 ❓ Need Help?
 Got questions or stuck somewhere? Reach out:
 
-Email: [Your email, if you provide one]
-GitHub Issues: [Link to repo issues, if hosted]
-Ollama Community: For LLaMA-related help.
+Email: mundriamohit100@gmail.com
 
 
 Moody Chatbot is more than code—it’s a friend who listens with heart. Chat away, and let’s make the world a little more understood, one emotion at a time! 💖
